@@ -1,6 +1,6 @@
 # Projeto Web Cars com React
 
-- utilizando:
+## utilizando:
 
 * hookform - Zod
 * react-router-dom
