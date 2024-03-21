@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import logoImg from "../../assets/logo.svg";
 import { Container } from "../../components/container";
 import { Input } from "../../components/input";
@@ -6,6 +7,8 @@ import { Input } from "../../components/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { auth } from "../../services/firebaseConnection";
 
 const schema = z.object({
   email: z
@@ -18,6 +21,8 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export function Login() {
+  const navigate = useNavigate(); 
+
   const {
     register,
     handleSubmit,
@@ -27,8 +32,24 @@ export function Login() {
     mode: "onChange"
   });
 
+  useEffect(() => {
+    async function handleLogout() {
+      await signOut(auth);
+    }
+
+    handleLogout();
+  }, [])
+
   function onSubmit(data: FormData) {
-    console.log(data);
+    signInWithEmailAndPassword(auth, data.email, data.password)
+    .then(() => {
+      console.log("Logado com sucesso!");
+      navigate("/dashboard", { replace: true });
+    })
+    .catch((error: any) => {
+      console.log(error);
+      console.log("Erro ao fazer login!");
+    });
   }
 
   return (
@@ -42,7 +63,7 @@ export function Login() {
           className="bg-white max-w-xl w-full rounded-lg"
           onSubmit={handleSubmit(onSubmit)}
         >
-          <div className="-mb-3">
+          <div className="mb-3">
             <Input
               type="email"
               placeholder="Digite seu email..."
@@ -52,7 +73,7 @@ export function Login() {
             />
           </div>
 
-          <div className="-mb-3">
+          <div className="mb-3">
             <Input
               type="password"
               placeholder="Digite sua senha..."
@@ -69,11 +90,11 @@ export function Login() {
             Acessar
           </button>
         </form>
-      </div>
 
       <Link to="/register" className="mt-4 text-zinc-900">
         Ainda não possui uma conta? Cadastre-se
       </Link>
+      </div>
     </Container>
   );
 };
